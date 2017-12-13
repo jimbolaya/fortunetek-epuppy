@@ -1,0 +1,94 @@
+To turn on LEDs
+
+Write:
+40 04 41 04 00 00 02 00 W
+        
+40 - 0100 0000 - bmRequestType - Direction = Host to Device, Type=Vendor, Recipient = Device
+04 - 0000 0100 - bRequest - data length greater than 1
+41 04 - 0100 0001 0000 0100 - wValue - request Value
+00 00 - 0000 0000 0000 0000 - wIndex - typ. index offset
+02 00 - 0000 0010 0000 0000 - wLength - No. Bytes to transfer - 2 bytes
+
+Buffer Data:
+02 xx -- Blink
+01 xx -- Solid
+00 xx -- Off
+
+xx 1F -- Turns off everything when used with 00
+xx 08 -- Red
+xx 04 -- Green
+xx 02 -- Speaker (00 - on, 01 - off)
+xx 01 -- ??
+xx 00 -- ??
+
+Flashing orange (red and green) or alternating (red xor green), is a 
+matter of timing.  The flash cycle is something less than 1 Hz and 
+without exact timing it would be difficult to change the flash mode
+without resetting it.  If the flash mode for the second LED is
+started while the first LED is lit or it is started combined (by adding 
+0x04 and 0x08), the light will be combined.  If the second LED is lit 
+during the off cycle of the first LED, it will be alternating.
+
+Once the flash mode for an LED has been started, it must be set to a 
+different state before it can be reset to a different cycle.
+
+-- libusb code snippet
+
+requesttype = 64; /* 0x40 (byte 1) */
+request = 4;  /* 0x04 (byte 2) */ 
+value = 1089; /* 0x0441 (bytes 3-4 swapped) */
+index = 0; /* 0x0000 (bytes 5-6 swapped) */
+size = 2; /* 0x0002 (bytes 7-8 swapped) */
+timeout = 500000;
+
+buffer[0] = 0;
+buffer[1] = 31;
+ret = usb_control_msg(lock_device, requesttype, request, value, index, buffer, size, timeout);
+
+Read Button State:
+
+C0 0C 40 01 00 00 01 00
+C0 - 1100 0000 - bmRequestType - Direction = Device to Host, Type=Vendor, Recipient = Device
+0C - 0000 1100 - bRequest - data length 1 or less
+40 01 - 0100 0000 0000 0001 - wValue - request Value
+00 00 - 0000 0000 0000 0000 - wIndex - typ. index offset
+01 00 - 0000 0001 0000 0000 - wLength - No. Bytes to transfer - 1 byte
+
+Buffer Data (read)
+00 -- No push
+01 -- Left Paw
+02 -- Bop Switch
+04 -- Right Paw
+08 -- Left Foot
+10 -- Right Foot
+
+requesttype = 192;
+request = 12;
+value = 320;
+index = 0;
+size = 1;
+timeout = 500000;
+
+
+ret = usb_control_msg(lock_device, requesttype, request, value, index, buffer, size, timeout); 
+
+buffer returns value as above.
+
+Read/Write USB device block?
+
+C0 04 40 02 00 00 E0 01 R
+C0 - 1100 0000 - bmRequestType - Direction = Device to Host, Type=Vendor, Recipient = Device
+04 - 0000 0100 - bRequest - data length greater than 1
+40 02 - 0100 0000 0000 0010 - wValue - request Value
+00 00 - 0000 0000 0000 0000 - wIndex - typ. index offset
+E0 01 - 1110 0000 0000 0001 - wLength - No. Bytes to transfer - 480 bytes
+
+40 04 41 03 00 00 E0 01 W
+40 - 0100 0000 - bmRequestType - Direction = Host to Device, Type=Vendor, Recipient = Device
+04 - 0000 0100 - bRequest - data length greater than 1 
+41 03 - 0100 0001 0000 0011 - wValue - request Value
+00 00 - 0000 0000 0000 0000 - wIndex - typ. index offset
+E0 01 - 1110 0000 0000 0001 - wLength - No. Bytes to transfer - 480 bytes
+
+
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 46 6F 72 74 75 6E 65 74 65 6B 00 01 48 6F 6D 65 50 61 67 65 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 46 6F 72 74 75 6E 65 74 65 6B 07 07 07 07 30 33 30 38 30 31 57 65 62 52 61 64 69 6F 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 4D 61 73 74 65 72 00 65 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 65 20 50 75 70 70 79 00 00 00 01 09 01 01 00 01 00 01 00 01 02 00 00 05 00 02 02 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 3F 00 03 F8 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

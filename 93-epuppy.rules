@@ -1,0 +1,1 @@
+SUBSYSTEM == "usb", ENV {DEVTYPE} == "usb_device", ATTR {idVendor} == "05e3", ATTR {idProduct} == "fd51", GROUP = "users", MODE = "0666" 

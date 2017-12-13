@@ -1,0 +1,52 @@
+/* Dev #1: (05e3)FORTUNETEK (fd51) ePuppy */
+
+#define USB_EPUPPY_VENDOR 0x05e3
+#define USB_EPUPPY_PRODUCT 0xfd51
+
+/* Set LED & speaker state
+ *
+ * requesttype = 64;
+ * request = 4;
+ * value = 1089;
+ * index = 0;
+ * size = 2;
+ * timeout = 500000;
+ *
+ */
+/* buffer[1] - byte 1 */
+#define RED 0x08
+#define GREEN 0x04
+#define SPEAKER 0x02
+
+/*
+ * 0x01 - Don't know 
+ * 0x00 - Don't know, I think off.
+ */
+
+/* buffer[0] - byte 0 */
+#define BLINK 0x02
+#define SOLID 0x01
+#define OFF 0x00
+#define SP_ON 0x00
+#define SP_OFF 0x01
+
+/* Read switch (paw/bop) state
+ *
+ * requesttype = 192;
+ * request = 12;
+ * value = 320;
+ * index = 0;
+ * size = 1;
+ * timeout = 500000;
+ *
+ * Return values below:
+ */ 
+
+#define NO_PUSH 0x00
+#define RIGHT_PAW 0x01
+#define HEAD_BOP 0x02
+#define LEFT_PAW 0x04
+#define RIGHT_FOOT 0x08
+#define LEFT_FOOT 0x10
+
+
